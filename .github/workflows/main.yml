@@ -1,0 +1,29 @@
+name: Extract JSON Details
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  extractDetails:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Access JSON data
+        id: access
+        run: |
+          echo '{"count":124,"contentResources":[{"id":"IflowForDevOpsTest","resourceID":"f3b1dc1cd5c34ce9a8a8b027d0edc418","type":"CloudIntegration","name":"Iflow For DevOps Test","subType":"package","version":"","title":"Test Iflow created by DevOps team for pipeline","vendor":"","description":"<p></p>","contentUrl":null,"componentQueryPattern":null,"components":[{"id":"Trial_Integration_Flow","name":"Trial Integration Flow","type":"Integration Flow","version":"1.0.1","additionalProperties":null,"exportable":false}],"dependencies":[],"additionalProperties":{"ExportMode":"ZIP"}},{"id":"IPOSTTest","resourceID":"0217163f50b643d3adaeef5d891cee96","type":"CloudIntegration","name":"IPOST Test","subType":"package","version":"","title":"IPOSTTest","vendor":"","description":"<p></p>","contentUrl":null,"componentQueryPattern":null,"components":[{"id":"IPost_iFlow","name":"IPost iFlow","type":"Integration Flow","version":"Active","additionalProperties":null,"exportable":false}],"dependencies":[],"additionalProperties":{"ExportMode":"ZIP"}}]}' >> json_data.json
+
+      - name: Extract Details
+        id: extract
+        run: |
+         json_data=$(cat json_data.json)
+
+          component_id=$(echo "$json_data" | jq -r '.contentResources[].components[] | select(.name == "IPost iFlow") | .id')
+          echo "test=$component_id" >> "$GITHUB_OUTPUT"
+
+      - name: extracted component id
+        run: |
+          extracted_component_id="${{ steps.extract.outputs.test }}"
+          echo "Extracted Component ID: $extracted_component_id"
